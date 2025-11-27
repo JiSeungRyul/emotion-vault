@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  name            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  emotionCapsules EmotionCapsule[]
+
+  @@map("users")
+}
+
+model EmotionCapsule {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  intensity   Int         // 0~100
+  colorHex    String      // "#RRGGBB"
+  emotionType EmotionType
+  shortText   String
+  note        String?     @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([emotionType])
+  @@map("emotion_capsules")
+}
+
+enum EmotionType {
+  PASSION      // 의지/열정
+  SADNESS      // 슬픔/상실
+  PURE_JOY     // 순수한 즐거움
+  HEALING      // 회복
+  FEAR         // 두려움
+  LONELINESS   // 외로움
+  INSPIRATION  // 영감
+  OTHER        // 기타
+}
