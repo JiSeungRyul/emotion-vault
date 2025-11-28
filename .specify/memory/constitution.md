@@ -1,50 +1,50 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Emotion Vault 헌법
+
+<!--
+Sync Impact Report
+Version change: 1.0.0 -> 1.0.1
+Modified principles: 코드 품질·유지보수성, 테스트 규율, UX 일관성·접근성, 성능·효율, 관측성·변경 안전
+Added sections: 품질 기준 및 요구사항; 개발 워크플로 및 품질 게이트
+Removed sections: 없음
+Templates requiring updates: .specify/templates/plan-template.md (검토: 변경 없음), .specify/templates/spec-template.md (검토: 변경 없음), .specify/templates/tasks-template.md (검토: 변경 없음)
+Follow-up TODOs: 없음
+-->
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. 코드 품질 & 유지보수성 (필수)
+작고 응집된 모듈과 명료한 네이밍·타이핑을 유지한다. 공유 유틸은 단일 위치에 두고 복붙을 금지한다. 코드와 문서를 함께 갱신하고, 죽은 코드는 제거한다. 린트/포맷을 통과해야 하며, 비사소한 아키텍처 결정은 PR에 기록한다. 의존성은 최소화하고, 근거 없는 추가·전이를 피한다. 리뷰에서는 가독성, 안전성, 되돌릴 수 있는지 여부를 중점으로 본다.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. 테스트 규율 (필수)
+모든 변경은 위험도에 비례한 자동화 테스트를 동반한다: 로직은 단위 테스트, 데이터/IO는 통합 테스트, API는 계약·회귀 테스트를 추가한다. 테스트는 결정적이고 고립되어야 하며, 숨은 외부 호출을 두지 않는다. CI가 전체 스위트를 실행해야 하고, 플래키 테스트는 즉시 수정하거나 격리한다. 인수 시나리오와 실패 케이스를 덮지 않으면 기능 병합을 금지한다.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. UX 일관성 & 접근성
+UI는 정의된 디자인 토큰/컴포넌트를 따른다. 새로운 패턴은 근거가 있어야 한다. 상호작용 상태(대기/로딩/비어 있음/에러/성공), 어조, affordance를 일관되게 유지한다. 접근성은 WCAG 2.1 AA를 충족한다: 키보드 내비게이션, 포커스 관리, ARIA 라벨/롤, 색 대비, 모션 민감도 보호. UX 변경은 데모나 전후 비교를 남긴다.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. 성능 & 효율
+명시적 성능 예산을 정하고 지킨다: 예상 부하에서 API p95 응답 <400ms, 중급 기기 기준 페이지 TTI <3s. 불필요한 쿼리·과도한 페칭을 피하고, 사용자 경로에서는 O(1)/O(log n)를 우선한다. 캐시·페이지네이션·인덱싱을 필요 시 사용하고, 성능 민감 영역은 프로파일링 후 배포한다. 메모리·번들 크기 증가는 측정 근거가 있어야 한다.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. 관측성 & 변경 안전
+주요 흐름(인증, 기록, 오류)에 대해 구조화된 로그를 남기고 상관 ID를 사용한다(민감정보는 배제). 새 핵심 경로에는 가능하면 메트릭·카운터를 추가한다. 마이그레이션은 전진만 허용하며, 후속 스텝이나 플래그로 되돌릴 방안을 마련한다. 롤아웃은 기능 플래그나 점진적 노출을 선호한다. 사고·회귀는 짧은 포스트모템이나 티켓 링크로 기록한다.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## 품질 기준 및 요구사항
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- 스택: Node.js 20+, Next.js 14(App Router), TypeScript, Prisma, PostgreSQL. eslint/포매터/tailwind 등 기존 설정을 따른다.
+- 시크릿/설정은 VCS에 넣지 않고 환경 변수로 관리하며, `.env.example`을 최신으로 유지한다.
+- DB 변경은 Prisma 마이그레이션 파일과 롤백·완화 노트가 필요하다.
+- API 계약과 UI 컴포넌트 프로퍼티를 문서화하며, 호환성 파괴 변경 시 버전 노트와 마이그레이션 가이드를 제공한다.
+- 보안 위생: 경계에서 입력을 검증하고, 출력은 이스케이프/인코드하며, DB/서비스 접근 권한은 최소화한다.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## 개발 워크플로 및 품질 게이트
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- 작업은 승인된 스펙과 구현 계획에서 시작하며, 브랜치 이름을 연계하고 산출물을 `specs/[feature]/`에 둔다.
+- PR에는 스펙/플랜 참조, 테스트 증거(명령과 결과), 성능·UX 영향, 마이그레이션 단계/플래그를 명시한다.
+- CI 실패, 테스트 누락, 성능·UX 원칙 위반 시 병합을 금지한다. 리뷰어는 이 헌법 준수 여부를 확인한다.
+- 릴리스 전: 스테이징 등가 DB에서 마이그레이션 검증, 영향 구간 스모크/통합 테스트 실행, 성능 민감 영역의 측정값을 확보한다.
+- 병합 후: 새 핵심 경로가 추가되면 모니터링/로그 대시보드나 알림을 갱신한다.
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+## 거버넌스
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+이 헌법은 품질, 테스트, UX, 성능, 안전에 대한 다른 가이드를 우선한다. 개정은 PR 논의와 근거, 그리고 세맨틱 버전 규칙(파괴/삭제 시 메이저, 새 원칙·섹션 추가 시 마이너, 명료화는 패치)에 따른 버전 상승이 필요하다. PR과 릴리스 전 검토에서 준수 여부를 확인하며, 위반 시 명시적 리스크 오너와 후속 계획을 남긴다.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.1 | **Ratified**: 2025-11-27 | **Last Amended**: 2025-11-27
