@@ -3,74 +3,87 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Slider } from "@/components/ui/slider"
-import { useToast } from "@/components/ui/use-toast"
 import { EmotionType } from "@prisma/client"
-import { EMOTION_TYPE_LABELS, EMOTION_COLORS, PRESET_COLORS } from "@/lib/types"
 import { ArrowLeft, Save } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/components/ui/use-toast"
+import { EMOTION_COLORS, EMOTION_TYPE_LABELS, PRESET_COLORS } from "@/lib/types"
+import { isNonEmptyText, isValidHexColor, isValidIntensity, sanitizeShortText, sanitizeNote } from "@/lib/utils"
+
+type FieldErrors = {
+  intensity?: string
+  colorHex?: string
+  shortText?: string
+}
 
 export default function RecordPage() {
   const router = useRouter()
   const { toast } = useToast()
-  
+
   const [intensity, setIntensity] = useState<number>(50)
   const [colorHex, setColorHex] = useState<string>(PRESET_COLORS[0])
   const [emotionType, setEmotionType] = useState<EmotionType>(EmotionType.PASSION)
   const [shortText, setShortText] = useState<string>("")
   const [note, setNote] = useState<string>("")
+  const [errors, setErrors] = useState<FieldErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const validate = (): boolean => {
+    const nextErrors: FieldErrors = {}
+    if (!isValidIntensity(intensity)) {
+      nextErrors.intensity = "Intensity must be between 0 and 100."
+    }
+    if (!isValidHexColor(colorHex)) {
+      nextErrors.colorHex = "Color must be a valid hex code (e.g. #FFAA00)."
+    }
+    if (!isNonEmptyText(shortText)) {
+      nextErrors.shortText = "Short text is required."
+    }
+    setErrors(nextErrors)
+    return Object.keys(nextErrors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!shortText.trim()) {
-      toast({
-        title: "오류",
-        description: "짧은 감정 문장을 입력해주세요.",
-        variant: "destructive",
-      })
-      return
-    }
+    if (!validate()) return
 
     setIsSubmitting(true)
-
     try {
       const response = await fetch("/api/emotions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           intensity,
           colorHex,
           emotionType,
-          shortText: shortText.trim(),
-          note: note.trim() || undefined,
+          shortText: sanitizeShortText(shortText),
+          note: sanitizeNote(note) ?? undefined,
         }),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to create emotion capsule")
+        const payload = await response.json().catch(() => ({}))
+        const message = payload?.error?.message || "Failed to create emotion capsule."
+        throw new Error(message)
       }
 
       toast({
-        title: "저장 완료!",
-        description: "감정 캡슐이 성공적으로 저장되었습니다.",
+        title: "Saved",
+        description: "Your emotion capsule has been created.",
       })
 
-      setTimeout(() => {
-        router.push("/timeline")
-      }, 1000)
+      setTimeout(() => router.push("/timeline"), 800)
     } catch (error) {
       console.error("Error creating emotion capsule:", error)
       toast({
-        title: "오류",
-        description: "감정 캡슐 저장에 실패했습니다.",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create emotion capsule.",
         variant: "destructive",
       })
       setIsSubmitting(false)
@@ -84,23 +97,20 @@ export default function RecordPage() {
           <Link href="/">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              홈으로
+              Back
             </Button>
           </Link>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">감정 캡슐 만들기</CardTitle>
-            <CardDescription>
-              지금 느끼는 감정을 캡슐로 저장하세요
-            </CardDescription>
+            <CardTitle className="text-3xl">Create an emotion capsule</CardTitle>
+            <CardDescription>Capture how you feel with a quick, structured entry.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Emotion Type */}
               <div>
-                <Label className="text-base font-semibold">감정 타입</Label>
+                <Label className="text-base font-semibold">Emotion type</Label>
                 <div className="grid grid-cols-2 gap-2 mt-3">
                   {Object.entries(EMOTION_TYPE_LABELS).map(([type, label]) => (
                     <button
@@ -114,10 +124,7 @@ export default function RecordPage() {
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: EMOTION_COLORS[type] }}
-                        />
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: EMOTION_COLORS[type] }} />
                         {label}
                       </div>
                     </button>
@@ -125,31 +132,22 @@ export default function RecordPage() {
                 </div>
               </div>
 
-              {/* Intensity Slider */}
               <div>
                 <Label htmlFor="intensity" className="text-base font-semibold">
-                  감정 강도: <span className="text-primary">{intensity}</span>
+                  Intensity: <span className="text-primary">{intensity}</span>
                 </Label>
                 <div className="mt-3">
-                  <Slider
-                    id="intensity"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={[intensity]}
-                    onValueChange={(value) => setIntensity(value[0])}
-                    className="w-full"
-                  />
+                  <Slider id="intensity" min={0} max={100} step={1} value={[intensity]} onValueChange={(value) => setIntensity(value[0])} className="w-full" />
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>약함 (0)</span>
-                    <span>강함 (100)</span>
+                    <span>Calm (0)</span>
+                    <span>Strong (100)</span>
                   </div>
+                  {errors.intensity && <p className="text-xs text-red-600 mt-1">{errors.intensity}</p>}
                 </div>
               </div>
 
-              {/* Color Picker */}
               <div>
-                <Label className="text-base font-semibold">감정 색상</Label>
+                <Label className="text-base font-semibold">Color</Label>
                 <div className="flex gap-2 mt-3 flex-wrap">
                   {PRESET_COLORS.map((color) => (
                     <button
@@ -157,9 +155,7 @@ export default function RecordPage() {
                       type="button"
                       onClick={() => setColorHex(color)}
                       className={`w-10 h-10 rounded-full border-4 transition-all ${
-                        colorHex === color
-                          ? "border-gray-800 scale-110"
-                          : "border-gray-200 hover:scale-105"
+                        colorHex === color ? "border-gray-800 scale-110" : "border-gray-200 hover:scale-105"
                       }`}
                       style={{ backgroundColor: color }}
                       aria-label={`Select color ${color}`}
@@ -170,37 +166,38 @@ export default function RecordPage() {
                     value={colorHex}
                     onChange={(e) => setColorHex(e.target.value)}
                     className="w-10 h-10 rounded-full border-4 border-gray-200 cursor-pointer"
+                    aria-label="Custom color"
                   />
                 </div>
+                {errors.colorHex && <p className="text-xs text-red-600 mt-1">{errors.colorHex}</p>}
               </div>
 
-              {/* Short Text */}
               <div>
                 <Label htmlFor="shortText" className="text-base font-semibold">
-                  짧은 감정 문장 *
+                  Short text *
                 </Label>
                 <Input
                   id="shortText"
-                  placeholder="예: 오늘은 정말 의미있는 하루였다"
+                  placeholder="What's on your mind?"
                   value={shortText}
                   onChange={(e) => setShortText(e.target.value)}
                   maxLength={200}
                   className="mt-2"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {shortText.length}/200
-                </p>
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>{shortText.length}/200</span>
+                  {errors.shortText && <span className="text-red-600">{errors.shortText}</span>}
+                </div>
               </div>
 
-              {/* Note */}
               <div>
                 <Label htmlFor="note" className="text-base font-semibold">
-                  추가 메모 (선택)
+                  Memo (optional)
                 </Label>
                 <Textarea
                   id="note"
-                  placeholder="더 자세한 내용을 기록하고 싶다면..."
+                  placeholder="Add more detail if you like."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={4}
@@ -208,20 +205,14 @@ export default function RecordPage() {
                 />
               </div>
 
-              {/* Submit Button */}
               <div className="flex gap-3 pt-4">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="flex-1"
-                  disabled={isSubmitting}
-                >
+                <Button type="submit" size="lg" className="flex-1" disabled={isSubmitting}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? "저장 중..." : "감정 캡슐 저장"}
+                  {isSubmitting ? "Saving..." : "Save capsule"}
                 </Button>
                 <Link href="/timeline">
                   <Button type="button" variant="outline" size="lg">
-                    취소
+                    Cancel
                   </Button>
                 </Link>
               </div>
