@@ -77,7 +77,7 @@ description: "Emotion Capsule Journal 기능 작업 목록"
 **목적**: 안정화 및 릴리스 준비
 
 - [X] T019 [P] `app/api/emotions` 라우트의 생성/조회/상세 핸들러에 구조화 로깅과 일관된 에러 형태 적용
-- [ ] T020 품질 게이트 실행(`npm run lint`, `npm run build`)으로 코드 품질·성능 예산 충족 확인
+- [X] T020 품질 게이트 실행(`npm run lint`, `npm run build`)으로 코드 품질·성능 예산 충족 확인
 
 ---
 
