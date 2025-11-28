@@ -37,3 +37,6 @@
 - Do not commit `.env`; start from `.env.example` and use strong Postgres credentials.
 - Prisma commands honor `DATABASE_URL`; confirm the target before running migrations or `db push`.
 - With Docker, `docker-compose --profile dev up -d` adds pgAdmin; use `docker-compose down -v` only when you intend to drop volumes or data.
+
+## Agent Instructions
+- Codex: 모든 응답은 한국어(ko-KR)로 작성한다.
