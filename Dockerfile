@@ -1,7 +1,10 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-bullseye-slim AS builder
 
 WORKDIR /app
+
+# Prisma 엔진이 필요로 하는 OpenSSL 설치
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
@@ -20,9 +23,12 @@ RUN npx prisma generate
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:20-bullseye-slim AS runner
 
 WORKDIR /app
+
+# Prisma 엔진이 필요로 하는 OpenSSL 설치
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV production
 
