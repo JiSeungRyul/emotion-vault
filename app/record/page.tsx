@@ -37,13 +37,13 @@ export default function RecordPage() {
   const validate = (): boolean => {
     const nextErrors: FieldErrors = {}
     if (!isValidIntensity(intensity)) {
-      nextErrors.intensity = "Intensity must be between 0 and 100."
+      nextErrors.intensity = "강도는 0~100 사이여야 합니다."
     }
     if (!isValidHexColor(colorHex)) {
-      nextErrors.colorHex = "Color must be a valid hex code (e.g. #FFAA00)."
+      nextErrors.colorHex = "색상은 올바른 HEX 코드여야 합니다 (예: #FFAA00)."
     }
     if (!isNonEmptyText(shortText)) {
-      nextErrors.shortText = "Short text is required."
+      nextErrors.shortText = "짧은 메모를 입력해 주세요."
     }
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
@@ -74,16 +74,16 @@ export default function RecordPage() {
       }
 
       toast({
-        title: "Saved",
-        description: "Your emotion capsule has been created.",
+        title: "저장되었습니다",
+        description: "감정 캡슐이 생성되었어요.",
       })
 
       setTimeout(() => router.push("/timeline"), 800)
     } catch (error) {
       console.error("Error creating emotion capsule:", error)
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create emotion capsule.",
+        title: "오류",
+        description: error instanceof Error ? error.message : "감정 캡슐 생성에 실패했습니다.",
         variant: "destructive",
       })
       setIsSubmitting(false)
@@ -97,20 +97,20 @@ export default function RecordPage() {
           <Link href="/">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              뒤로 가기
             </Button>
           </Link>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">Create an emotion capsule</CardTitle>
-            <CardDescription>Capture how you feel with a quick, structured entry.</CardDescription>
+            <CardTitle className="text-3xl">감정 캡슐 기록하기</CardTitle>
+            <CardDescription>지금 느끼는 감정을 빠르게 정리해 보세요.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label className="text-base font-semibold">Emotion type</Label>
+                <Label className="text-base font-semibold">감정 유형</Label>
                 <div className="grid grid-cols-2 gap-2 mt-3">
                   {Object.entries(EMOTION_TYPE_LABELS).map(([type, label]) => (
                     <button
@@ -134,20 +134,20 @@ export default function RecordPage() {
 
               <div>
                 <Label htmlFor="intensity" className="text-base font-semibold">
-                  Intensity: <span className="text-primary">{intensity}</span>
+                  감정 강도: <span className="text-primary">{intensity}</span>
                 </Label>
                 <div className="mt-3">
                   <Slider id="intensity" min={0} max={100} step={1} value={[intensity]} onValueChange={(value) => setIntensity(value[0])} className="w-full" />
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Calm (0)</span>
-                    <span>Strong (100)</span>
+                    <span>잔잔함 (0)</span>
+                    <span>강렬함 (100)</span>
                   </div>
                   {errors.intensity && <p className="text-xs text-red-600 mt-1">{errors.intensity}</p>}
                 </div>
               </div>
 
               <div>
-                <Label className="text-base font-semibold">Color</Label>
+                <Label className="text-base font-semibold">색상</Label>
                 <div className="flex gap-2 mt-3 flex-wrap">
                   {PRESET_COLORS.map((color) => (
                     <button
@@ -158,7 +158,7 @@ export default function RecordPage() {
                         colorHex === color ? "border-gray-800 scale-110" : "border-gray-200 hover:scale-105"
                       }`}
                       style={{ backgroundColor: color }}
-                      aria-label={`Select color ${color}`}
+                      aria-label={`색상 선택 ${color}`}
                     />
                   ))}
                   <input
@@ -166,7 +166,7 @@ export default function RecordPage() {
                     value={colorHex}
                     onChange={(e) => setColorHex(e.target.value)}
                     className="w-10 h-10 rounded-full border-4 border-gray-200 cursor-pointer"
-                    aria-label="Custom color"
+                    aria-label="직접 색상 선택"
                   />
                 </div>
                 {errors.colorHex && <p className="text-xs text-red-600 mt-1">{errors.colorHex}</p>}
@@ -174,11 +174,11 @@ export default function RecordPage() {
 
               <div>
                 <Label htmlFor="shortText" className="text-base font-semibold">
-                  Short text *
+                  짧은 메모 *
                 </Label>
                 <Input
                   id="shortText"
-                  placeholder="What's on your mind?"
+                  placeholder="지금 어떤 기분인가요?"
                   value={shortText}
                   onChange={(e) => setShortText(e.target.value)}
                   maxLength={200}
@@ -193,11 +193,11 @@ export default function RecordPage() {
 
               <div>
                 <Label htmlFor="note" className="text-base font-semibold">
-                  Memo (optional)
+                  메모 (선택)
                 </Label>
                 <Textarea
                   id="note"
-                  placeholder="Add more detail if you like."
+                  placeholder="더 자세히 남기고 싶은 내용이 있다면 적어주세요."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={4}
@@ -208,11 +208,11 @@ export default function RecordPage() {
               <div className="flex gap-3 pt-4">
                 <Button type="submit" size="lg" className="flex-1" disabled={isSubmitting}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? "Saving..." : "Save capsule"}
+                  {isSubmitting ? "저장 중..." : "캡슐 저장"}
                 </Button>
                 <Link href="/timeline">
                   <Button type="button" variant="outline" size="lg">
-                    Cancel
+                    취소
                   </Button>
                 </Link>
               </div>

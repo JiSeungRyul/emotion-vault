@@ -26,14 +26,14 @@ export interface CreateEmotionCapsuleInput {
 }
 
 export const EMOTION_TYPE_LABELS: Record<EmotionType, string> = {
-  PASSION: 'Passion',
-  SADNESS: 'Sadness',
-  PURE_JOY: 'Pure Joy',
-  HEALING: 'Healing',
-  FEAR: 'Fear',
-  LONELINESS: 'Loneliness',
-  INSPIRATION: 'Inspiration',
-  OTHER: 'Other',
+  PASSION: '열정/설렘',
+  SADNESS: '슬픔/상실',
+  PURE_JOY: '순수한 기쁨',
+  HEALING: '치유/회복',
+  FEAR: '두려움',
+  LONELINESS: '외로움',
+  INSPIRATION: '영감',
+  OTHER: '기타',
 }
 
 export const EMOTION_COLORS: Record<EmotionType | string, string> = {
