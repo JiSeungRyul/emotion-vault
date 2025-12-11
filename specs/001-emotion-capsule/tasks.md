@@ -81,41 +81,14 @@ description: "Emotion Capsule Journal 기능 작업 목록"
 
 ---
 
-## Phase 7: 인증/계정 추가 (로그인 기능)
-
-**목적**: 다중 사용자 기반으로 전환하고 보호된 감정 API를 제공
-
-- [ ] T1 users 테이블 migration 생성 (email unique index, password_hash 컬럼)
-- [ ] T2 emotion_records(또는 emotion_capsules) 테이블에 user_id FK 추가
-- [ ] T3 기존 emotion CRUD API를 user_id 기반 필터링으로 수정
-- [ ] T4 AuthService 생성(signup, login, refresh 로직)
-- [ ] T5 bcrypt 기반 비밀번호 해시/검증 유틸 작성
-- [ ] T6 JWT 모듈 설정(access & refresh secret, expiresIn)
-- [ ] T7 `/auth/signup` API 구현
-- [ ] T8 `/auth/login` API 구현
-- [ ] T9 `/auth/refresh-token` API 구현
-- [ ] T10 인증 가드(JWT Guard) 구현
-- [ ] T11 refresh token 저장/관리 로직(DB 또는 Redis) 구현
-- [ ] T12 기존 emotion API 엔드포인트에 Guard 적용
-- [ ] T13 emotion CRUD 내부에 "본인 데이터만" 검증 추가(user_id 비교)
-- [ ] T14 로그인 폼 UI 제작(email/password)
-- [ ] T15 회원가입 폼 UI 제작
-- [ ] T16 로그인 성공 시 token 저장 로직 구현
-- [ ] T17 인증 필요한 페이지 접근 시 자동 리다이렉트 처리
-- [ ] T18 API 호출 시 Authorization 헤더 자동 주입
-- [ ] T19 Auth E2E 테스트 추가(가입→로그인→토큰→보호 API)
-- [ ] T20 Emotion API 인증 통합 테스트 추가
-- [ ] T21 로그인 실패/토큰 만료 테스트
-
 ## 선행 관계 & 실행 순서
 
-- 기존 Phase 1~6 이후 인증 전환 진행: DB/모델(T1~T3) → Auth 서비스/라우트(T4~T11) → Emotion API 가드 적용(T12~T13) → FE 폼/토큰 처리(T14~T18) → 테스트(T19~T21)
-- 데이터 모델 변경(T1~T3)이 모든 단계의 선행 조건.
-- 토큰/가드(T10~T11) 완료 후 Emotion API 보호(T12~T13) 적용.
-- 프론트 토큰/리다이렉트(T16~T18)는 백엔드 인증이 준비된 후 진행.
+- 준비(Phase 1) → 기반(Phase 2) → US1(Phase 3) → US2(Phase 4) → US3(Phase 5) → 마무리(Phase 6)
+- US2/US3는 데이터가 있어야 함. US1 완료 또는 Phase 2 이후 시드 데이터로 검증.
+- 각 스토리 내 순서: 검증/타입 → UI 연결, API 핸들러 → UI 사용, 기본 플로우 완료 후 로깅.
 
 ## 구현 전략
 
-- 인증 도입 전 기존 단일 사용자 로직을 점진적으로 제거하고 마이그레이션 후 다중 사용자 기준으로 API를 전환.
-- refresh 토큰 저장/로테이션 방식을 먼저 결정(DB 테이블 vs. 필드), JWT 시크릿/만료를 환경변수로 분리.
-- 테스트는 최소 E2E(가입→로그인→보호 API)와 로그인 실패/토큰 만료를 포함해 회귀 위험을 줄인다.
+- MVP 우선: 준비/기반 완료 후 US1 end-to-end 제공, 생성 플로우 검증 뒤 확장.
+- 점진적: US2로 타임라인 추가(US1 유지), US3로 상세 추가, 마지막에 마무리 작업.
+- 태스크 ID 단위의 작은 커밋 권장, 각 Phase 종료 시 수용 조건으로 검증.
